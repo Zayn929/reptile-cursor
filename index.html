@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reptile Cursor</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const segments = 20;
+    const length = 15;
+    let points = [];
+
+    for (let i = 0; i < segments; i++) {
+      points.push({ x: width / 2, y: height / 2 });
+    }
+
+    let mouse = { x: width / 2, y: height / 2 };
+
+    document.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      points[0].x += (mouse.x - points[0].x) * 0.2;
+      points[0].y += (mouse.y - points[0].y) * 0.2;
+
+      for (let i = 1; i < segments; i++) {
+        let dx = points[i - 1].x - points[i].x;
+        let dy = points[i - 1].y - points[i].y;
+        let angle = Math.atan2(dy, dx);
+        points[i].x = points[i - 1].x - Math.cos(angle) * length;
+        points[i].y = points[i - 1].y - Math.sin(angle) * length;
+      }
+
+      // Draw the reptile "skeleton"
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < segments; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.stroke();
+
+      // Draw small joints
+      for (let i = 0; i < segments; i++) {
+        ctx.beginPath();
+        ctx.arc(points[i].x, points[i].y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'lime';
+        ctx.fill();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
